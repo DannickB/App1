@@ -1,18 +1,21 @@
 #include <Arduino.h>
-
-// put function declarations here:
-int myFunction(int, int);
+#include <HardwareSerial.h>
+HardwareSerial SerialPort(1);
+char bitOfMessage = ' ';
+std::string message = " ";
+int msg = 0;
 
 void setup() {
   // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  SerialPort.begin(9600, SERIAL_8N1, 18, 19);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  bitOfMessage = char(SerialPort.read());
+  if (bitOfMessage != '\n'){
+    message += bitOfMessage;
+  }
+  msg = std::stoi(message.substr(2,1));
+  Serial.println(msg);
 }

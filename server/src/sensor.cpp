@@ -97,3 +97,16 @@ void Sensor::UpdateSensors() {
     wind_speed = weatherMeterKit.getWindSpeed();
     rain_count = weatherMeterKit.getTotalRainfall();
 };
+
+void Sensor::ToSerial() {
+    Serial.println("Barometer Temperature: " + String(barometer_temperature) + "°C");
+    Serial.println("Barometer Pressure: " + String(barometer_pressure) + "kPa");
+    Serial.println("Humidity: " + String(humidity) + "%");
+    Serial.println("Temperature: " + String(temperature) + "°C");
+    Serial.println("Light level: " + String(light_level) + ", (" + String(light_level_voltage) + "V)");
+    Serial.println("Total rainfall: " + String(rain_count) + "mm");
+    Serial.println("Wind direction: " + String(wind_direction) + "°");
+    Serial.println("Wind speed: " + String(wind_speed) + "km/h");
+    Serial.println("*************************");
+    Serial.println("");
+};

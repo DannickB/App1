@@ -37,7 +37,6 @@ public:
     void Init();
     void UpdateSensors();
     void ToSerial();
-
 };
 
 #endif

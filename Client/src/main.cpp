@@ -1,6 +1,25 @@
 #include "BLEDevice.h"
 #include <Wire.h>
 #include <Arduino.h>
+#include "enum.h"
+#include <HardwareSerial.h>
+
+#define TXD1 12
+#define RXD1 14
+
+struct {
+  String Barometer_Temperature;
+  String Pressure;
+  String Humididy;
+  String Temperature;
+  String Light_level;
+  String Rainfall;
+  String Wind_direction;
+  String Wind_Speed;
+} sensorStruc;
+
+// Use Serial1 for UART communication
+HardwareSerial SerialPort(2);
 
 //BLE Server name (the other ESP32 name running the server sketch)
 #define bleServerName "Base Station Server"
@@ -29,16 +48,67 @@ const uint8_t notificationOff[] = {0x0, 0x0};
 //Flags to check whether new temperature and humidity readings are available
 boolean newNotification = false;
 
-char* data;
+int sensor;
+void readUartData(int sensor){
+  String message;
+  while (SerialPort.available() > 0) {
+    message = SerialPort.readStringUntil('\n');
+  }
+  switch(sensor) {
+    case sensorEnum::Barometer_Temperature:
+      sensorStruc.Barometer_Temperature = message;
+      break;
+    case sensorEnum::Pressure:
+      sensorStruc.Pressure = message;
+      break;
+    case sensorEnum::Humididy:
+      sensorStruc.Humididy = message;
+      break;
+    case sensorEnum::Temperature:
+      sensorStruc.Temperature = message;
+      break;
+    case sensorEnum::Light_level:
+      sensorStruc.Light_level = message;
+      break;
+    case sensorEnum::Rainfall:
+      sensorStruc.Rainfall = message;
+      break;
+    case sensorEnum::Wind_direction:
+      sensorStruc.Wind_direction = message;
+      break;
+    case sensorEnum::Wind_Speed:
+      sensorStruc.Wind_Speed = message;
+      break;
+    default:
+      Serial.print("Upcode invalid");
+  }
+  delay(50);
+  SerialPort.println(sensor);
+
+}
+
+void printValues(){
+  Serial.println("Barometer Temperature: " + sensorStruc.Barometer_Temperature + "°C");
+  Serial.println("Barometer Pressure: " + sensorStruc.Pressure + "kPa");
+  Serial.println("Humidity: " + sensorStruc.Humididy + "%");
+  Serial.println("Temperature: " + sensorStruc.Temperature + "°C");
+  Serial.println("Light level: " + sensorStruc.Light_level);
+  Serial.println("Total rainfall: " + sensorStruc.Rainfall + "mm");
+  Serial.println("Wind direction: " + sensorStruc.Wind_Speed + "°");
+  Serial.println("Wind speed: " + sensorStruc.Wind_direction + "km/h");
+  Serial.println("*************************");
+  Serial.println("");
+
+}
 
 //When the BLE Server sends a new temperature reading with the notify property
 static void NotifyCallback(BLERemoteCharacteristic* pBLERemoteCharacteristic, 
   uint8_t* pData, size_t length, bool isNotify) {
-data = (char*)pData;
-Serial.print("Notification received: ");
-Serial.println(data);
+sensor = std::atoi((char*)pData);
 newNotification = true;
+readUartData(sensor);
 }
+
 
 //Connect to the BLE Server that has the name, Service, and Characteristics
 bool connectToServer(BLEAddress pAddress) {
@@ -82,11 +152,11 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
   }
 };
 
-
 void setup() {
   
   //Start serial communication
   Serial.begin(115200);
+  SerialPort.begin(9600, SERIAL_8N1, RXD1, TXD1);  // UART setup
   Serial.println("Starting Arduino BLE Client application...");
 
   //Init BLE device
@@ -121,5 +191,6 @@ void loop() {
     newNotification = false;
     Serial.println("Waiting for new com...");
   }
+  printValues();
   delay(1000); // Delay a second between loops.
 }

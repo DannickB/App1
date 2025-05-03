@@ -93,7 +93,7 @@ void Sensor::UpdateSensors() {
     light_level_voltage = static_cast<float>(analogRead(GPIO_LIGHTMETER)) / 4095.0 * 3.3;
 
     // Reads the rainmeter sensor if available and store result
-    wind_direction = static_cast<float>(analogRead(GPIO_ANOMEMETER_DIRECTION)) / 4095.0 * 360.0;
+    wind_direction = static_cast<int>(analogRead(GPIO_ANOMEMETER_DIRECTION)) / 4095.0 * 360.0;
     wind_speed = weatherMeterKit.getWindSpeed();
     rain_count = weatherMeterKit.getTotalRainfall();
 };

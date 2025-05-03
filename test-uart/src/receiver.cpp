@@ -1,23 +1,31 @@
+/*********
+  Rui Santos & Sara Santos - Random Nerd Tutorials
+  Complete instructions at https://RandomNerdTutorials.com/esp32-uart-communication-serial-arduino/
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files.
+  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+*********/
+
+// Define TX and RX pins for UART (change if needed)
 #include <Arduino.h>
 #include <HardwareSerial.h>
-HardwareSerial SerialPort(1);
-char bitOfMessage = ' ';
-std::string message = " ";
-int msg = 0;
+#define TXD1 16
+#define RXD1 17
+
+// Use Serial1 for UART communication
+HardwareSerial mySerial(2);
 
 void setup() {
-  // put your setup code here, to run once:
-  SerialPort.begin(9600, SERIAL_8N1, 37, 36);
+  Serial.begin(9600);
+  mySerial.begin(9600, SERIAL_8N1, RXD1, TXD1);  // UART setup
+  
+  Serial.println("ESP32 UART Receiver");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  if(SerialPort.available()){
-    bitOfMessage = char(SerialPort.read());
-    if (bitOfMessage != '\n'){
-      message += bitOfMessage;
-    }
-    msg = std::stoi(message.substr(2,1));
-    Serial.println(msg);
+  // Check if data is available to read
+  if (mySerial.available()) {
+    // Read data and display it
+    String message = mySerial.readStringUntil('\n');
+    Serial.println("Received: " + message);
   }
 }

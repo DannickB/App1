@@ -135,28 +135,28 @@ void loop() {
 
       switch (i) {
         case sensor_enum::Barometer_Temperature:
-          UARTsendData = String(sensor.barometer_temperature);
+          UARTsendData = String(sensor_enum::Barometer_Temperature + sensor.barometer_temperature);
           break;
         case sensor_enum::Pressure:
-          UARTsendData = String(sensor.barometer_pressure);
+          UARTsendData = String(sensor_enum::Pressure + sensor.barometer_pressure);
           break;
         case sensor_enum::Huminidy:
-          UARTsendData = String(sensor.humidity);
+          UARTsendData = String(sensor_enum::Huminidy +sensor.humidity);
           break;
         case sensor_enum::Temperature:
-          UARTsendData = String(sensor.temperature);
+          UARTsendData = String(sensor_enum::Temperature +sensor.temperature);
           break;
         case sensor_enum::Ligh_level:
-          UARTsendData = String(sensor.light_level);
+          UARTsendData = String(sensor_enum::Ligh_level +sensor.light_level);
           break;
         case sensor_enum::Rainfall:
-          UARTsendData = String(sensor.rain_count);
+          UARTsendData = String(sensor_enum::Rainfall + sensor.rain_count);
           break;
         case sensor_enum::Wind_direction:
-          UARTsendData = String(sensor.wind_direction);
+          UARTsendData = String(sensor_enum::Wind_direction +sensor.wind_direction);
           break;
         case sensor_enum::Wind_Speed:
-          UARTsendData = String(sensor.wind_speed);
+          UARTsendData = String(sensor_enum::Wind_Speed +sensor.wind_speed);
           break;
         default:
           UARTsendData = "ERROR";
@@ -164,8 +164,8 @@ void loop() {
       }
       mySerial.println(UARTsendData);
 
-      while (!mySerial.available()) {
-      }
+      // while (!mySerial.available()) {
+      // }
 
       UARTsendData = mySerial.readStringUntil('\n');
       Serial.println("Received from client: " + UARTsendData);

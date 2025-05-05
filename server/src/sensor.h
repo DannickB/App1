@@ -27,7 +27,7 @@ public:
     float light_level_voltage;
     int rain_count;
 
-    SFEWeatherMeterKit weatherMeterKit = SFEWeatherMeterKit(GPIO_ANOMEMETER_SPEED, GPIO_ANOMEMETER_DIRECTION, GPIO_RAINMETER);
+    SFEWeatherMeterKit weatherMeterKit = SFEWeatherMeterKit(GPIO_ANOMEMETER_DIRECTION, GPIO_ANOMEMETER_SPEED, GPIO_RAINMETER);
 
     // Constructor and Destructor
     Sensor();

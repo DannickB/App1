@@ -90,37 +90,17 @@ void loop() {
     }
   }
 
-  /*if (deviceConnected) {
-    if ((millis() - lastTime) > timerDelay) {
-      
-      String str = "42";
-      value = 42;
-      // Notify temperature reading from BME sensor
-      static char valueTemp[6];
-      dtostrf(value, 6, 2, valueTemp);
-      // Set temperature Characteristic value and notify connected client
-      notificationCharacteristic.setValue("str");
-      notificationCharacteristic.notify();
-      Serial.println("Sending notification to client");
-
-      lastTime = millis();
-    }
-  }*/
-
   if (deviceConnected) {
-
-    // Update sensorial data
-    delay(3000);
 
     // Send ping containing sensor data opcode so that the client knows which data to except
     String UARTsendData;
     static char buffer[6];
 
+    sensor.UpdateSensors();
+    sensor.ToSerial();
+
     unsigned long lastSentPing = millis();
     for (int i = 0; i < sensor_enum::enum_max; i++) {
-
-      sensor.UpdateSensors();
-      sensor.ToSerial();
       
       // dtostrf needs a float value, so we need to cast the int opcode to float
       dtostrf(static_cast<float>(i), 6, 2, buffer);
@@ -130,57 +110,48 @@ void loop() {
       
       // Send ping
       notificationCharacteristic.notify();
-      Serial.println("Sending notification to client : " + String(i));
-      delay(100);
 
       switch (i) {
         case sensor_enum::Barometer_Temperature:
-          UARTsendData = String(sensor_enum::Barometer_Temperature + sensor.barometer_temperature);
+          UARTsendData = String(sensor.barometer_temperature);
           break;
         case sensor_enum::Pressure:
-          UARTsendData = String(sensor_enum::Pressure + sensor.barometer_pressure);
+          UARTsendData = String(sensor.barometer_pressure);
           break;
         case sensor_enum::Huminidy:
-          UARTsendData = String(sensor_enum::Huminidy +sensor.humidity);
+          UARTsendData = String(sensor.humidity);
           break;
         case sensor_enum::Temperature:
-          UARTsendData = String(sensor_enum::Temperature +sensor.temperature);
+          UARTsendData = String(sensor.temperature);
           break;
         case sensor_enum::Ligh_level:
-          UARTsendData = String(sensor_enum::Ligh_level +sensor.light_level);
+          UARTsendData = String(sensor.light_level_voltage);
           break;
         case sensor_enum::Rainfall:
-          UARTsendData = String(sensor_enum::Rainfall + sensor.rain_count);
+          UARTsendData = String(sensor.rain_count);
           break;
         case sensor_enum::Wind_direction:
-          UARTsendData = String(sensor_enum::Wind_direction +sensor.wind_direction);
+          UARTsendData = String(sensor.wind_direction);
           break;
         case sensor_enum::Wind_Speed:
-          UARTsendData = String(sensor_enum::Wind_Speed +sensor.wind_speed);
+          UARTsendData = String(sensor.wind_speed);
           break;
         default:
           UARTsendData = "ERROR";
           break;
       }
+      UARTsendData = String(i) + UARTsendData;
+      Serial.println("Sending data to client: " + UARTsendData);
       mySerial.println(UARTsendData);
 
-      // while (!mySerial.available()) {
-      // }
+      delay(50);
 
-      UARTsendData = mySerial.readStringUntil('\n');
-      Serial.println("Received from client: " + UARTsendData);
-      if (UARTsendData.toInt() == i) {
-        Serial.println("ACK received : " + String(i));
-        break;
-      }
-      else {
-        Serial.println("ERROR, received: " + UARTsendData + " expected: " + String(i));
-      }
+    } // End of for loop
+    delay(1000);
+  } // Endif deviceConnected
 
-      // Wait for opcode ACK trough 
-
-
-      delay(500);
-    }
+  else {
+    Serial.println("Client disconnected, waiting for new connection...");
+    delay(1000);
   }
 }

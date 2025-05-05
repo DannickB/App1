@@ -93,12 +93,14 @@ void Sensor::UpdateSensors() {
     light_level_voltage = static_cast<float>(analogRead(GPIO_LIGHTMETER)) / 4095.0 * 3.3;
 
     // Reads the rainmeter sensor if available and store result
-    wind_direction = static_cast<int>(analogRead(GPIO_ANOMEMETER_DIRECTION)) / 4095.0 * 360.0;
+    //wind_direction = static_cast<float>(analogRead(GPIO_ANOMEMETER_DIRECTION)) / 4095.0 * 360.0;
+    wind_direction = weatherMeterKit.getWindDirection();
     wind_speed = weatherMeterKit.getWindSpeed();
     rain_count = weatherMeterKit.getTotalRainfall();
 };
 
 void Sensor::ToSerial() {
+    Serial.println("");
     Serial.println("Barometer Temperature: " + String(barometer_temperature) + "°C");
     Serial.println("Barometer Pressure: " + String(barometer_pressure) + "kPa");
     Serial.println("Humidity: " + String(humidity) + "%");
@@ -107,6 +109,5 @@ void Sensor::ToSerial() {
     Serial.println("Total rainfall: " + String(rain_count) + "mm");
     Serial.println("Wind direction: " + String(wind_direction) + "°");
     Serial.println("Wind speed: " + String(wind_speed) + "km/h");
-    Serial.println("*************************");
     Serial.println("");
 };

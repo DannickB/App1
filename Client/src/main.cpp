@@ -4,9 +4,11 @@
 #include "enum.h"
 #include <HardwareSerial.h>
 
+//Rx Tx pins
 #define TXD1 12
 #define RXD1 14
 
+//Struct containing our sensors info
 struct {
   String Barometer_Temperature;
   String Pressure;
@@ -24,11 +26,8 @@ HardwareSerial SerialPort(2);
 //BLE Server name (the other ESP32 name running the server sketch)
 #define bleServerName "Base Station Server"
 
-/* UUID's of the service, characteristic that we want to read*/
-// BLE Service
+// BLE Service and characteristic
 static BLEUUID bmeServiceUUID("91bad492-b950-4226-aa2b-4ede9fa42f59");
-
-// BLE Characteristics
 static BLEUUID notificationCharacteristicUUID("cba1d466-344c-4be3-ab3f-189f80dd7518");
 
 //Flags stating if should begin connecting and if the connection is up
@@ -41,72 +40,71 @@ static BLEAddress *pServerAddress;
 //Characteristicd that we want to read
 static BLERemoteCharacteristic* notificationCharacteristic;
 
-//Activate notify
+//Activate notify callback
 const uint8_t notificationOn[] = {0x1, 0x0};
 const uint8_t notificationOff[] = {0x0, 0x0};
 
 //Flags to check whether new temperature and humidity readings are available
 boolean newNotification = false;
 
-int sensor;
-void readUartData(int sensor){
+//Read data from Uart port and store it in appropriate variable
+void readUartData(){
   String message;
   while (SerialPort.available() > 0) {
     message = SerialPort.readStringUntil('\n');
   }
-  switch(sensor) {
+  int upcode = (int)message[0] - 48;
+  String data = message.substring(1);
+  switch(upcode) {
     case sensorEnum::Barometer_Temperature:
-      sensorStruc.Barometer_Temperature = message;
+      sensorStruc.Barometer_Temperature = data;
       break;
     case sensorEnum::Pressure:
-      sensorStruc.Pressure = message;
+      sensorStruc.Pressure = data;
       break;
     case sensorEnum::Humididy:
-      sensorStruc.Humididy = message;
+      sensorStruc.Humididy = data;
       break;
     case sensorEnum::Temperature:
-      sensorStruc.Temperature = message;
+      sensorStruc.Temperature = data;
       break;
     case sensorEnum::Light_level:
-      sensorStruc.Light_level = message;
+      sensorStruc.Light_level = data;
       break;
     case sensorEnum::Rainfall:
-      sensorStruc.Rainfall = message;
+      sensorStruc.Rainfall = data;
       break;
     case sensorEnum::Wind_direction:
-      sensorStruc.Wind_direction = message;
+      sensorStruc.Wind_direction = data;
       break;
     case sensorEnum::Wind_Speed:
-      sensorStruc.Wind_Speed = message;
+      sensorStruc.Wind_Speed = data;
       break;
     default:
-      Serial.print("Upcode invalid");
+      Serial.println("\nUpcode invalid\n\n");
   }
-  delay(50);
-  SerialPort.println(sensor);
 
 }
-
+//Print Received variables
 void printValues(){
-  Serial.println("Barometer Temperature: " + sensorStruc.Barometer_Temperature + "°C");
-  Serial.println("Barometer Pressure: " + sensorStruc.Pressure + "kPa");
-  Serial.println("Humidity: " + sensorStruc.Humididy + "%");
-  Serial.println("Temperature: " + sensorStruc.Temperature + "°C");
-  Serial.println("Light level: " + sensorStruc.Light_level);
-  Serial.println("Total rainfall: " + sensorStruc.Rainfall + "mm");
-  Serial.println("Wind direction: " + sensorStruc.Wind_Speed + "°");
-  Serial.println("Wind speed: " + sensorStruc.Wind_direction + "km/h");
+  Serial.println("Barometer Temperature(°C): " + sensorStruc.Barometer_Temperature);
+  Serial.println("Barometer Pressure(kPa): " + sensorStruc.Pressure );
+  Serial.println("Humidity(%): " + sensorStruc.Humididy);
+  Serial.println("Temperature(°C): " + sensorStruc.Temperature);
+  Serial.println("Light level(V): " + sensorStruc.Light_level);
+  Serial.println("Total rainfall(mm): " + sensorStruc.Rainfall);
+  Serial.println("Wind direction(°): " + sensorStruc.Wind_direction);
+  Serial.println("Wind speed(km/h): " + sensorStruc.Wind_Speed);
   Serial.println("*************************");
   Serial.println("");
 
 }
 
-//When the BLE Server sends a new temperature reading with the notify property
+//Receive notification
 static void NotifyCallback(BLERemoteCharacteristic* pBLERemoteCharacteristic, 
   uint8_t* pData, size_t length, bool isNotify) {
-sensor = std::atoi((char*)pData);
 newNotification = true;
-readUartData(sensor);
+readUartData();
 }
 
 
@@ -114,11 +112,11 @@ readUartData(sensor);
 bool connectToServer(BLEAddress pAddress) {
    BLEClient* pClient = BLEDevice::createClient();
  
-  // Connect to the remove BLE Server.
+  // Connect to the BLE Server.
   pClient->connect(pAddress);
   Serial.println(" - Connected to server");
  
-  // Obtain a reference to the service we are after in the remote BLE server.
+  // Get server ref
   BLERemoteService* pRemoteService = pClient->getService(bmeServiceUUID);
   if (pRemoteService == nullptr) {
     Serial.print("Failed to find our service UUID: ");
@@ -126,7 +124,7 @@ bool connectToServer(BLEAddress pAddress) {
     return (false);
   }
  
-  // Obtain a reference to the characteristics in the service of the remote BLE server.
+  // Get characteristic ref
   notificationCharacteristic = pRemoteService->getCharacteristic(notificationCharacteristicUUID);
 
   if (notificationCharacteristic == nullptr) {
@@ -144,9 +142,9 @@ bool connectToServer(BLEAddress pAddress) {
 class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
   void onResult(BLEAdvertisedDevice advertisedDevice) {
     if (advertisedDevice.getName() == bleServerName) { //Check if the name of the advertiser matches
-      advertisedDevice.getScan()->stop(); //Scan can be stopped, we found what we are looking for
-      pServerAddress = new BLEAddress(advertisedDevice.getAddress()); //Address of advertiser is the one we need
-      doConnect = true; //Set indicator, stating that we are ready to connect
+      advertisedDevice.getScan()->stop(); 
+      pServerAddress = new BLEAddress(advertisedDevice.getAddress()); 
+      doConnect = true; //Set flag, stating that we are ready to connect
       Serial.println("Device found. Connecting!");
     }
   }
@@ -162,9 +160,7 @@ void setup() {
   //Init BLE device
   BLEDevice::init("");
  
-  // Retrieve a Scanner and set the callback we want to use to be informed when we
-  // have detected a new device.  Specify that we want active scanning and start the
-  // scan to run for 30 seconds.
+  // Scans for BLE server
   BLEScan* pBLEScan = BLEDevice::getScan();
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
   pBLEScan->setActiveScan(true);
@@ -172,13 +168,11 @@ void setup() {
 }
 
 void loop() {
-  // If the flag "doConnect" is true then we have scanned for and found the desired
-  // BLE Server with which we wish to connect.  Now we connect to it.  Once we are
-  // connected we set the connected flag to be true.
+  // See if we need to connect to BLE server and subscrib to it's characteristic
   if (doConnect == true) {
     if (connectToServer(*pServerAddress)) {
       Serial.println("We are now connected to the BLE Server.");
-      //Activate the Notify property of each Characteristic
+      //Activate the Notify property of our Characteristic
       notificationCharacteristic->getDescriptor(BLEUUID((uint16_t)0x2902))->writeValue((uint8_t*)notificationOn, 2, true);
       connected = true;
     } else {
@@ -186,7 +180,7 @@ void loop() {
     }
     doConnect = false;
   }
-  //if new temperature readings are available, print in the OLED
+  //Reset variable to wait for new notification
   if (newNotification){
     newNotification = false;
     Serial.println("Waiting for new com...");

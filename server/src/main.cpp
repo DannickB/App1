@@ -28,11 +28,8 @@ unsigned long lastTime = 0;
 unsigned long timerDelay = 3000;
 bool deviceConnected = false;
 
-// See the following for generating UUIDs:
-// https://www.uuidgenerator.net/
+//Service, characteristic and description declaration
 #define SERVICE_UUID "91bad492-b950-4226-aa2b-4ede9fa42f59"
-
-
 BLECharacteristic notificationCharacteristic("cba1d466-344c-4be3-ab3f-189f80dd7518", BLECharacteristic::PROPERTY_NOTIFY);
 BLEDescriptor bmeNotificationDescriptor(BLEUUID((uint16_t)0x2902));
 
@@ -92,7 +89,7 @@ void loop() {
 
   if (deviceConnected) {
 
-    // Send ping containing sensor data opcode so that the client knows which data to except
+    // Send ping with the notify characteristic so the clients knows some values have been updated
     String UARTsendData;
     static char buffer[6];
 

@@ -1,3 +1,9 @@
+/// @file main.cpp
+/// @brief Fichier main de communication entre le serveur et le client, client side
+/// @author Gabriel Labrecque labg0902, Dannick Bilodeau bild2707
+/// @date 2025-05-02
+/// @version 1.0
+
 #include "BLEDevice.h"
 #include <Wire.h>
 #include <Arduino.h>

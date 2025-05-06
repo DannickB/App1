@@ -1,3 +1,9 @@
+/// @file main.cpp
+/// @brief Fichier main de communication entre le serveur et le client, server side
+/// @author Gabriel Labrecque labg0902, Dannick Bilodeau bild2707
+/// @date 2025-05-02
+/// @version 1.0
+
 
 #define FLAG_SERVER
 

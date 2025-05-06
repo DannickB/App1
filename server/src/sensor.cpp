@@ -1,16 +1,16 @@
+/// @file sensor.cpp
+/// @brief Sensor class implementation
+/// @details Integrates various sensors including a barometer, light meter, rain meter, anemometer, and humidometer.
+/// @author Gabriel Labrecque labg0902, Dannick Bilodeau bild2707
+/// @date 2025-05-02
+/// @version 1.0
+
 #include "sensor.h"
 
 #include <Arduino.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_DPS310.h>
 #include <SparkFun_Weather_Meter_Kit_Arduino_Library.h>
-
-/// @file sensor.cpp
-/// @brief Sensor class implementation
-/// @details Integrates various sensors including a barometer, light meter, rain meter, anemometer, and humidometer.
-/// @author Gabriel Labrecque, Dannick Bilodeau
-/// @date 2025-05-02
-/// @version 1.0
 
 Sensor::Sensor() {};
 

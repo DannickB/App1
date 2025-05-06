@@ -1,3 +1,10 @@
+/// @file enum.h
+/// @brief Server side enumeration header of sensor opcodes
+/// @details Integrates various sensors including a barometer, light meter, rain meter, anemometer, and humidometer.
+/// @author Gabriel Labrecque labg0902, Dannick Bilodeau bild2707
+/// @date 2025-05-02
+/// @version 1.0
+
 #ifndef ENUM_H
 #define ENUM_H
 
